@@ -1,0 +1,240 @@
+octave:102> function r=Rt(T)
+> r=exp(34.78 - 532468/T + 2557578327/(T*T));end
+octave:103> T = ([70:400]-32)*5/9 + 273.15;
+octave:104> plot(T)
+octave:105> function r=Rt(T)
+> r=exp(34.78 - 532468./T + 2557578327./(T.*T));end
+octave:106> plot(T,Rt(T))
+octave:107> hold off
+octave:108> plot(T,Rt(T))
+octave:110> plot(T,34.78 - 532468./T + 2557578327./(T.*T))
+octave:111> plot((T-273.15)*5/9+32)
+octave:112> 
+octave:112> plot((T-273.15)*9/5+32)
+octave:113> plot((T-273.15)*9/5+32,T)
+octave:114> plot(T,34.78 - 532468./T + 2557578327./(T.*T))
+octave:115> plot(T,exp(34.78 - 532468./T + 2557578327./(T.*T)))
+octave:116> a = load('thermistor.dat')
+a =
+
+    32.000   793.000
+    33.800   747.000
+    35.600   717.000
+    36.000   715.000
+    37.000   682.000
+    38.700   673.000
+    40.100   645.000
+    41.700   617.000
+    42.600   601.000
+    45.500   550.000
+    46.700   536.000
+    51.300   469.000
+    59.400   374.000
+    68.200   295.000
+    72.100   264.800
+    73.400   255.600
+    76.300   239.200
+    78.100   227.400
+    79.700   218.500
+    80.100   216.500
+    80.600   214.100
+    80.800   211.900
+    82.600   202.800
+    85.300   189.200
+    87.800   176.800
+    90.000   168.600
+    92.800   156.800
+    95.400   147.200
+    99.100   134.400
+   102.700   123.000
+   104.900   116.400
+   109.400   105.200
+   113.400    95.900
+   115.500    91.600
+   119.500    83.700
+   121.300    79.800
+   123.400    76.100
+   126.000    71.900
+   127.900    68.600
+   133.500    61.000
+   148.500    44.200
+   154.100    39.100
+   157.300    36.700
+   162.700    33.100
+   169.300    28.800
+   175.000    25.700
+   178.200    24.200
+   182.100    22.800
+   184.600    21.250
+   187.300    20.400
+   191.100    19.040
+   204.000    15.080
+
+octave:117> tF = a(:,1);
+octave:118> rK = a(:,2);
+octave:119> tC = (tF-32)*5/9;
+octave:120> lnR = log(rK*1000);
+octave:121> tInv = 1/(tC+273.15);
+octave:122> kHi = find(tC > 35); % focus fit on range of interest
+octave:123> tcHi = tC(kHi);
+octave:124> tInvHi = tInv(kHi);
+octave:125> p=polyfit(tInvHi(:),lnRhi(:),1)
+error: `lnRhi' undefined near line 125 column 21
+error: evaluating argument list element number 2
+error: evaluating argument list element number 1
+octave:125> lnRhi = lnR(kHi);
+octave:126> p=polyfit(tInvHi(:),lnRhi(:),1)
+p =
+
+  -1.9343e+05   2.3581e+01
+
+octave:127> p=polyfit(tInvHi(:),lnRhi(:),2)
+p =
+
+   2.5576e+09  -5.3247e+05   3.4783e+01
+
+octave:128> plot(T)
+octave:129> plot(T,exp(p(3)+p(2) ./ T+p(1) ./ (T .* T)))
+octave:130> plot(T,p(3)+p(2) ./ T+p(1) ./ (T .* T))
+octave:131> plot(tInvHi,lnRhi,'kx')
+octave:132> plot(tInv)
+octave:133> plot(tF,rK,'kx')
+octave:134> grid on
+octave:135> semilogy(tF,rK,'kx')
+octave:136> tFhi=tF(kHi);
+octave:137> rKhi=rK(kHi);
+octave:138> hold on;grid on
+octave:139> semilogy(tFhi,rKhi,'ko')
+octave:140> p=polyfit(tFhi(:),log(rKhi(:)),2)
+p =
+
+   3.0533e-05  -3.0109e-02   7.5842e+00
+
+octave:141> tf1=[50:400];
+octave:142> lnrK1=p(3)+p(2)*tf1+p(1)*(tf1.*tf1);
+octave:143> range(lnrK1)
+ans =
+
+   0.42607   6.15508
+
+octave:144> semilogy(tf1,exp(lnrK1))
+octave:145> xlabel('Temperature (F)');ylabel('R (KOhm)');
+octave:146> title(sprintf('ln(rK)=%.2f %.4g/tF + %.4g/tF^{2}',p([3,2,1])))
+octave:147> title(sprintf('ln(rK)=%.2f %.4g tF + %.4g tF^{2}',p([3,2,1])))
+octave:148> title(sprintf('ln(rK)=%.3f %.4g tF + %.4g tF^{2}',p([3,2,1])))
+octave:149> print ThermistorCalF.pdf
+octave:150> system('evince ThermistorCalF.pdf')
+ans = 0
+octave:151> 
+octave:151> rf = exp(lnrK1)*1000;
+octave:152> range(rf)
+ans =
+
+   1.5312e+03   4.7110e+05
+
+octave:153> hold off
+octave:154> semilogy(tf1,rf);grid on
+octave:155> semilogy(tF,rK*1000,'kx')
+octave:156> semilogy(tf1,rf);grid on;hold on
+octave:157> semilogy(tF,rK*1000,'kx')
+octave:158> semilogy(tFhi,rKhi*1000,'ko')
+octave:159> 
+octave:159> 
+octave:159> R=100000;
+octave:160> tr1 = (-p(2) + sqrt(p(2)*p(2) - 4*p(1)*(p(3)-log(R))))/(2*p(1))
+tr1 =  1102.8
+octave:161> tr1 = (-p(2) + sqrt(p(2)*p(2) - 4*p(1)*(p(3)-log(R/1000))))/(2*p(1))
+tr1 =  874.53
+octave:162> tr2 = (-p(2) - sqrt(p(2)*p(2) - 4*p(1)*(p(3)-log(R/1000))))/(2*p(1))
+tr2 =  111.56
+octave:163> ginput(1)
+octave:164> [x,y]=ginput(1)
+x =  110.40
+y =  1.0007e+05
+octave:165> R0 = 22000;
+octave:166> counts=[0:1023];
+octave:167> Rc=R0*(1023./counts-1);
+octave:168> hold off
+octave:169> plot(counts,Rc)
+octave:170> semilogy(counts,Rc)
+warning: axis: omitting nonpositive data in log plot
+octave:171> counts=[1:1022];
+octave:172> Rc=R0*(1023./counts-1);
+octave:173> semilogy(counts,Rc)
+octave:174> tCounts=(-p(2)-sqrt(p(2)*p(2)-4*p(1)*(p(3)-log(R/1000))))/(2*p(1));
+octave:175> plot(counts,tCounts)
+octave:176> 
+octave:176> hold off
+octave:177> 
+octave:177> 
+octave:177> 
+octave:177> 
+octave:177> hold off
+octave:178> plot(counts,tCounts)
+octave:179> 
+octave:179> range(tCounts)
+ans =
+
+   111.56   111.56
+     counts       1x1022                    8176  double
+       tCounts      1x1                          8  double
+
+Total is 1023 elements using 8184 bytes
+
+octave:181> tCounts=(-p(2)-sqrt(p(2)*p(2)-4.*p(1).*(p(3)-log(Rc/1000))))/(2*p(1));
+octave:182> whos counts tCounts
+Variables in the current scope:
+
+  Attr Name         Size                     Bytes  Class
+  ==== ====         ====                     =====  ===== 
+       counts       1x1022                    8176  double
+       tCounts      1x1022                   16352  double
+
+Total is 2044 elements using 24528 bytes
+
+octave:183> plot(counts,tCounts)
+octave:184> grid on
+octave:185> xlabel('Thermistor Counts');ylabel('Temperature (F)');title('Counts to Temperature(F), R_{0}=22K')
+octave:186> print counts2tempF.pdf
+octave:187> TPOLY_F_C=p(3);TPOLY_F_B=p(2);TPOLY_F_A=p(1);
+octave:188> c=600;
+octave:189> RT0=22000;
+octave:190> r = RT0*(1023./c-1)
+r =  1.5510e+04
+octave:191> t = TPOLY_F_B*TPOLY_F_B - 4 * TPOLY_F_A * (TPOLY_F_C - log(r))
+t =  0.0011587
+octave:192> t = -(TPOLY_F_B + sqrt(t))/(TPOLY_F_A*2)
+t = -64.384
+octave:193> t = TPOLY_F_B*TPOLY_F_B - 4 * TPOLY_F_A * (TPOLY_F_C - log(r/1000))
+t =  3.1507e-04
+octave:194> t = -(TPOLY_F_B + sqrt(t))/(TPOLY_F_A*2)
+t =  202.37
+octave:195> tempF=t;
+octave:196>  lnR = TPOLY_F_C + tempF*TPOLY_F_B + tempF*tempF*TPOLY_F_A
+lnR =  2.7415
+octave:197> c = 1023. * (RTO/(RT0+exp(lnR)))
+error: `RTO' undefined near line 197 column 14
+octave:197> c = 1023. * (RT0/(RT0+exp(lnR)))
+c =  1022.3
+octave:198> c = 1023. * (RT0/(RT0+exp(lnR*1000)))
+c = 0
+octave:199> exp(lnR)
+ans =  15.510
+octave:200> c = 1023. * (RT0/(RT0+exp(lnR)*1000))
+c =  600.00
+octave:201> c = 1023. * (RT0/(RT0+exp(lnR)*1000))
+c =  600.00
+octave:202> 100*9/5+32
+ans =  212
+octave:203> (212-32)*5/9
+ans =  100
+octave:204> TPOLY_F_A
+TPOLY_F_A =  3.0533e-05
+octave:205> TPOLY_F_B
+TPOLY_F_B = -0.030109
+octave:206> p
+p =
+
+   3.0533e-05  -3.0109e-02   7.5842e+00
+
+octave:207> diary off

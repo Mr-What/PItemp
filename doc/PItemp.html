@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>PI Temerature Controller</title>
+  </head>
+
+  <body STYLE="font-family:Arial">
+<H6 align=right>
+$URL: svn+ssh://aaron@birenboim.com/home/svn/arduino/sketchbook/PItemp/doc/PItemp.html $
+<BR>$Id: PItemp.html 41 2012-02-06 15:45:10Z aaron $
+</H6>
+    <h1 align=center>PI Temerature Controller</h1>
+
+<P>
+<TABLE BORDER align=center width="60%"><CAPTION>LED Description</CAPTION>
+<TR><TH bgcolor="#cc0000"><font color="white">Red</font></TH>
+<TD>Illuminated when the controller is working to increase the temperature.
+<BR>In open loop mode, it flashes slowly.</TD></TR>
+<TR><TH bgcolor="#0000cc"><font color="white">Blue</TH>
+<TD>Illuminated when controller is slowing down,
+attempting to decrease the temperature.
+<BR>Flashes slowly when in open loop mode.</TD></TR>
+<TR><TH bgcolor="#00cc00">Green</TH>
+<TD>Variable brightness, shows fan speed (on Fan Control Module)</TD></TR>
+<TR><TH>White</TH>
+<TD>Variable brightness, shows current temperature reading</TD></TR>
+</TABLE>
+
+<P>
+When in analog command mode (set TempCounts to a negative number),
+desired temperature setting is read from the trimmer pot on the pannel.
+When the TempCounts command is set to a valid value from the serial port,
+this will be used as the temperature command, and the pot is ignored.
+
+<P>
+The main control law is:<PRE>
+  MotorSpeed = gain * (err + Int(err)/Ti)</PRE>
+Where err is the desired temperature(counts) - current sensed temperature(counts).
+The integral of past errors, Int(err), is in counts*minutes.
+
+<P>Description of operation and serial commands to PI temperature controller.
+<TABLE BORDER><CAPTION>Command Summary</CAPTION>
+<TR><TH>Command</TH><TH>Description</TH></TR>
+<TR><TD><TT>show</TT></TD><TD>Display current state, and command hints</TD></TR>
+<TR><TD><TT>+++...</TT></TD><TD>Increase temperature setting, 1 count per +</TD></TR>
+<TR><TD><TT>---...</TT></TD><TD>Decrease temperature setting, 1 count per -</TD></TR>
+<TR><TD><TT>TempCounts</TT></TD><TD>Set desired temperature counts, [0,1023].
+<BR><B>Set to -1 to take temperature setting from dial</B>.
+<BR>Calibration is intended to be part of the host software/application.
+<BR>See other device calibration for conversion between degrees and counts.</TD></TR>
+<TR><TD><TT>MotorSpeed</TT></TD><TD>Override control loop, and set the motor speed to
+the indicated constant level, [0,255].
+<BR>Increasing/Decreasing LEDs will show a slow flashing pattern in this mode.</TD></TR>
+<TR><TD><TT>MotorMin</TT></TD><TD>Minimum sustainable motor speed, counts [0,255]</TD></TR>
+<TR><TD><TT>MotorStartSpeed</TT></TD><TD>Speed setting necessary to get motor started from stall</TD></TR>
+<TR><TD><TT>MotorStartTime</TT></TD><TD>Time, in milliseconds, needed to stay at MotorStartSpeed to get motor running from stall</TD></TR>
+<TR><TD><TT>gain</TT></TD><TD>Change control loop gain</TD></TR>
+<TR><TD><TT>Ti</TT></TD><TD>Integration time, adjust integrator sensitivity.
+<BR>This number should be on the close order of the system <EM>response time</em></TD></TR>
+<TR><TD><TT>LogPeriod</TT></TD><TD>Time between state report updates (and time step for dy/dt computation)</TD></TR>
+<TR><TD><TT>LPF</TT></TD><TD>Low pass filter for temperature sensor (and pot).
+(0,1].
+<BR>1==no filter.  Close to 0 input is highly averaged.</TD></TR>
+<TR><TD><TT>kick</TT></TD><TD>Add this number of counts to the current motor command.
+<BR>This is done by adding or subtracting the appropriate amount to the integrator.
+The control loop will work to adjust the integrator after a kick appropriately.</TD></TR>
+<TR><TD><TT>IntegratorValue</TT></TD><TD>Override current integrator level.
+Can help kick loop into a more stable state.</TD></TR>
+<TR><TD><TT>reset</TT></TD><TD>Reset system state to default, initial values.</TD></TR>
+<TR><TD><TT>about</TT></TD><TD>show version numnber</TD></TR>
+<TR><TD><TT>save</TT></TD><TD>Save current state, including integrator level</TD></TR>
+</TABLE>
+
+<P>
+<TABLE BORDER align=center><CAPTION>Arduino Uno Pin Connection Chart</CAPTION>
+<TR><TD>3 Digital Out</TD><TD>PWM fan speed control output.</TD></TR>
+<TR><TD>6 Digital Out</TD><TD>PWM temperature display output</TD></TR>
+<TR><TD>7 Digital Out</TD><TD>Temperature increasing (Current temp below command)</TD></TR>
+<TR><TD>4 Digital Out</TD><TD>Temperature decreasing (current temp above command)</TD></TR>
+<TR><TD>13 Digital Out</TD><TD>on-board LED heartbeat.</TD></TR>
+<TR><TD>0 Analog In</TD><TD>Temperature sensor input</TD></TR>
+<TR><TD>1 Analog In</TD><TD>(optional) Temperature potentiometer input.
+<BR>Set TempCounts to a negative numnber to enable</TD></TR>
+</TABLE>
+
+<H3>Loop Tuning</H3>
+<UL>
+<LI>If temperatue oscillates around desired set point, try reducing gain.</LI>
+<LI>If temperature overshoots desired set point, try increasing Ti.</LI>
+<LI>If temperature changes too slowly, try increasing gain.</LI>
+<LI>If it takes too long for temperature to reach new set point, try reducing Ti.</LI>
+</UL>
+
+    <hr>
+    <address><a href="mailto:aaron@boim.com">Aaron Birenboim</a></address>
+<!-- Created: Mon Jan 30 19:07:42 MST 2012 -->
+<!-- hhmts start -->
+Last modified: Mon Feb  6 08:43:33 MST 2012
+<!-- hhmts end -->
+  </body>
+</html>
