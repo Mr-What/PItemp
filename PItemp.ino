@@ -338,6 +338,7 @@ void printLogLine(const float t, const float u, const float y, const float c, co
   Serial.print(t,2);
   printTab(); Serial.print(tCmd,0);
   printTab(); Serial.print(tSens,2);
+  printTab(); Serial.print(y,1);
   printTab(); Serial.print(c,0); // motor speed command?
   printTab(); Serial.println(Integrator,2);
 }
@@ -483,7 +484,7 @@ void printState(PID_State *s)
     Serial.println(State.AnalogCommand?F("analog pot (TempCounts set <0)"):F("TempCounts command\n"));
   }
   else Serial.println(F("# Loop is open, Motor set to above speed.\n"));
-  Serial.println(F("#minutes tCmd\ttemp\tspeed\tintegrator"));
+  Serial.println(F("#minutes tCmd\ttemp\tcounts\t28.3speed\tintegrator"));
   Serial.flush();  // wait for print to complete, Arduino>=1.0, purge print else
 }
 
