@@ -178,6 +178,8 @@ void updateFlashingLEDs()
   if (FlashingLEDstate >= (sizeof(FlashingLEDcode)/sizeof(int))) FlashingLEDstate=0;
 }
 
+#if 0
+/* not able to reproduce this math, 200428 ab.  re-do */
 float tempF_counts(float c)  /* temp(F) from counts */
 {
   float r = RT0*(1023./c-1);  /* Resistance of thermistor (ohms) from counts */
@@ -213,3 +215,44 @@ float tempC_counts(float c)
   float f = tempF_counts(c);
   return((f-32)*5/9);
 }
+#else
+/* direct calibration, thermometer C reading to thermistor circuit counts */
+float counts_tempC(float C)  // get counts from tempC
+{
+  float C2 = C*C;
+  float counts = CPOLY0;      //Serial.println(counts,2);
+  counts += CPOLY1 * C;       //Serial.println(counts,2);
+  counts += CPOLY2 * C2;      //Serial.println(counts,2);
+  counts += CPOLY3 * C2 * C;  //Serial.println(counts,2);
+  //float counts = CPOLY3 * C2 * C + CPOLY2 * C2 + CPOLY1 * C + CPOLY0;
+  //Serial.print(C,2);Serial.print(F("C -->"));Serial.print(counts,1);Serial.println(F(" counts"));
+  return(counts);
+}
+float tempC_counts(float counts) // get tempC from counts
+{
+  float t0 = 0;    //  lowest temp supported  (This is food oven...)
+  float t1 = 200;  // highest temp supported
+  float c0=counts_tempC(t0);  //  lowest supported count
+  float c1=counts_tempC(t1);  // highest supported count
+  while(t1-t0 > 0.03)  // interval-half search
+    {
+      float t  = 0.5 * (t0+t1);
+      float c = counts_tempC(t);
+      if(c >= counts) { c1=c;  t1=t; }
+      else            { c0=c;  t0=t; }
+    }
+  return(0.5*(t0+t1));
+}
+
+float tempF_counts(float c)  /* temp(F) from counts */
+{
+  float tC = tempC_counts(c);
+  return(32. + tC * (9./5.));
+}
+float counts_tempF(float tempF)   /* counts from tempF */
+{
+  float tC = (tempF-32.) * (5./9.);
+  return(counts_tempC(tC));
+}
+#endif
+
