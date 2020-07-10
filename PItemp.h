@@ -24,9 +24,16 @@ Arduino has a chance of defining these before they are used.
 #define TPOLY_F_A (3.0533e-5)   /* These are obtained from calibration */
 #define TPOLY_F_B (-0.030109)   /* of thermistor probe */
 #define TPOLY_F_C 7.584
-#define RT0 19500 /*22000*/  /* resistor on thermistor divider */
+#define RT0 19500//19500 /*22000*/  /* resistor on thermistor divider */
 
 #define R_COUNTS(x) (RT0*(1023/(x)-1))  /* Resistance at given sensor counts */
+
+/* Calibration to cooking thermometer directly from ATD output
+   C to counts */
+#define CPOLY0  32.1489
+#define CPOLY1   1.05929815
+#define CPOLY2   0.049783756
+#define CPOLY3  (-0.000088614784)
 
 typedef struct MotorInfo_s {
   int minSpeed;    // motor stops spinning at this level, switch to wide-scale PWM [0..255]
